@@ -124,6 +124,21 @@ class Hadith_API_Endpoints {
             'callback' => array( $this, 'hadith_get_hadith_endpoint_cb' ),
             'permission_callback' => '__return_true',
         ) );
+        
+        /*Search hadith*/
+        register_rest_route( 'hadith/v1', '/hadith/limit/(?P<limit>[0-9]+)/', array(
+            'methods' => 'GET',
+            'args' => array(
+              /*'search' => array(
+                'required' => true
+              ),*/
+              'limit' => array(
+                'required' => true
+              )
+            ),
+            'callback' => array( $this, 'hadith_search_hadith_endpoint_cb' ),
+            'permission_callback' => '__return_true',
+        ) );
 
     }
     
@@ -226,9 +241,26 @@ class Hadith_API_Endpoints {
             
             //$results = $this->get_results( 'hadith_en', $limit, 'single', array( ' 	book_id'=>$book, 'chapter_id'=>$chapter ) );
             
-        }else {
-            //$results = $wpdb->get_results( "SELECT * FROM hadith_en", OBJECT );
-            $results = $this->get_results( 'hadith_en', $limit, 'all' );
+        }
+
+        return $results;
+    }
+    public function hadith_search_hadith_endpoint_cb( $data ) {
+
+        global $wpdb;
+        
+        $limit = '';
+        if(isset($data['limit']) && $data['limit'] != ''){
+            $limit = intval($data['limit']);
+        }
+        
+        $results = '';
+        
+        if( isset($data['search']) && !empty($data['search']) ){
+            $search = $data['search'];
+        
+            $results = $wpdb->get_results( "SELECT * FROM hadith_en WHERE narrator LIKE '%$search%' OR text LIKE '%$search%' OR reference LIKE '%$search%' OR related LIKE '%$search%' OR narrator_ar LIKE '%$search%' OR text_ar LIKE '%$search%' OR narrator_arend LIKE '%$search%' OR narrator_ar_diacless LIKE '%$search%' OR text_ar_diacless LIKE '%$search%' OR narrator_arend_diacless LIKE '%$search%' LIMIT $limit", OBJECT );
+            
         }
 
         return $results;
