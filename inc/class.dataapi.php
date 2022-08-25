@@ -129,9 +129,6 @@ class Hadith_API_Endpoints {
         register_rest_route( 'hadith/v1', '/hadith/limit/(?P<limit>[0-9]+)/', array(
             'methods' => 'GET',
             'args' => array(
-              /*'search' => array(
-                'required' => true
-              ),*/
               'limit' => array(
                 'required' => true
               )
@@ -254,12 +251,25 @@ class Hadith_API_Endpoints {
             $limit = intval($data['limit']);
         }
         
+        $operator = 'OR';
+        if( isset($data['type']) && $data['type'] == 'exact' ){
+            $operator = 'AND';
+        }
+        
         $results = '';
         
         if( isset($data['search']) && !empty($data['search']) ){
             $search = $data['search'];
-        
-            $results = $wpdb->get_results( "SELECT * FROM hadith_en WHERE narrator LIKE '%$search%' OR text LIKE '%$search%' OR reference LIKE '%$search%' OR related LIKE '%$search%' OR narrator_ar LIKE '%$search%' OR text_ar LIKE '%$search%' OR narrator_arend LIKE '%$search%' OR narrator_ar_diacless LIKE '%$search%' OR text_ar_diacless LIKE '%$search%' OR narrator_arend_diacless LIKE '%$search%' LIMIT $limit", OBJECT );
+            
+            if( isset($data['book']) && !empty($data['book']) ){
+                $books = $data['book'];
+                
+                $results = $wpdb->get_results( "SELECT * FROM hadith_en WHERE book_id IN ( $books ) $operator (narrator LIKE '%$search%' OR text LIKE '%$search%' OR reference LIKE '%$search%' OR related LIKE '%$search%' OR narrator_ar LIKE '%$search%' OR text_ar LIKE '%$search%' OR narrator_arend LIKE '%$search%' OR narrator_ar_diacless LIKE '%$search%' OR text_ar_diacless LIKE '%$search%' OR narrator_arend_diacless LIKE '%$search%') LIMIT $limit", OBJECT );
+                
+            }else {
+                $results = $wpdb->get_results( "SELECT * FROM hadith_en WHERE narrator LIKE '%$search%' OR text LIKE '%$search%' OR reference LIKE '%$search%' OR related LIKE '%$search%' OR narrator_ar LIKE '%$search%' OR text_ar LIKE '%$search%' OR narrator_arend LIKE '%$search%' OR narrator_ar_diacless LIKE '%$search%' OR text_ar_diacless LIKE '%$search%' OR narrator_arend_diacless LIKE '%$search%' LIMIT $limit", OBJECT );
+            }
+            
             
         }
 
