@@ -21,6 +21,7 @@ class Hadith_Core {
         define( 'HADITH_ASSTES', HADITH_URL.'/assets');
         define( 'HADITH_PATH', plugin_dir_path( __FILE__ ) );
         define( 'HADITH_INC', HADITH_PATH.'inc' );
+        define( 'HADITH_CLASSES__FILE__', __FILE__ );
         
         //Require hadith classes
         require_once(HADITH_INC.'/hadith.php');

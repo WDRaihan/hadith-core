@@ -6,3 +6,4 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once(plugin_dir_path( __FILE__ ).'/class.video-post.php');
 require_once(plugin_dir_path( __FILE__ ).'/class.dataapi.php');
+require_once(plugin_dir_path( __FILE__ ).'/class.functions.php');

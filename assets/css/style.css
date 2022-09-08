@@ -1,0 +1,8 @@
+.hadith-reports-table {
+    width: 100%;
+    max-width: 100%;
+    background: #fff
+}
+.hadith-reports-table #hadith_reports_wrapper {
+    padding: 20px
+}

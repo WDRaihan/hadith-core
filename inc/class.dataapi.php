@@ -136,6 +136,24 @@ class Hadith_API_Endpoints {
             'callback' => array( $this, 'hadith_search_hadith_endpoint_cb' ),
             'permission_callback' => '__return_true',
         ) );
+        
+        /*Search hadith*/
+        register_rest_route( 'hadith/v1', '/report/', array(
+            'methods' => 'POST',
+            /*'args' => array(
+              'name' => array(
+                'required' => false
+              ),
+              'email' => array(
+                'required' => true
+              ),
+              'message' => array(
+                'required' => true
+              )
+            ),*/
+            'callback' => array( $this, 'hadith_report' ),
+            'permission_callback' => '__return_true',
+        ) );
 
     }
     
@@ -274,6 +292,67 @@ class Hadith_API_Endpoints {
         }
 
         return $results;
+    }
+    
+    public function hadith_report($request){
+        $params = $request->get_params();
+        
+		$nonce = '';
+        
+        global $wpdb;
+        $table_name = $wpdb->prefix.'reports';
+        
+		if(isset( $_SERVER['HTTP_X_WP_NONCE'] )){
+			$nonce = $_SERVER['HTTP_X_WP_NONCE'];
+		}
+		
+		// Check the nonce.
+	
+		if ( ! wp_verify_nonce( $nonce, 'wp_rest' ) ) {
+			return new WP_REST_Response( array('error' => 'Cookie nonce is invalid.'), 403 );
+		}
+        
+        if( !empty($params['partial']) && !empty($params['status']) && !empty($params['report_id']) ){
+            
+            $update = $wpdb->query(
+                $wpdb->prepare(
+                   "UPDATE $table_name SET status='{$params['status']}' WHERE ID={$params['report_id']}"
+                )
+            );
+        }
+        
+        if( $update ){
+            return new WP_REST_Response( array('message' => 'Status updated.'), 200 );
+        }
+        if( !$update ){
+            return new WP_REST_Response( array('message' => $wpdb->last_error), 403 );
+        }
+        
+		if (empty($params['email'])){
+			return new WP_REST_Response( array('error' => 'Email Missing.'), 403 );
+		} 
+
+		if (empty($params['message'])){
+			return new WP_REST_Response( array('error' => 'Message Missing.'), 403 );
+		} 
+
+        $insert = $wpdb->query(
+            $wpdb->prepare(
+               "INSERT INTO $table_name
+               ( name, email, message, status, date )
+               VALUES ( %s, %s, %s, %s, %s )",
+               $params['name'],
+               $params['email'],
+               $params['message'],
+               $params['status'],
+               current_time( 'mysql' )
+            )
+         );
+        
+        if( $insert ){
+            return new WP_REST_Response( array('message' => 'Report submited.'), 200 );
+        }
+        
     }
     
 }
